@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <!-- load robot URDF description -->
+  <param name="robot_description" command="xacro --inorder $(find challenge_project)/urdf/turtlebot3_burger.urdf.xacro"/>
+
+  <!-- robot initial position -->
+  <arg name="x" default="-1.0409"/>
+  <arg name="y" default="0.3795"/>
+  <!--<arg name="x" default="-5.2"/>-->
+  <!--<arg name="y" default="1.35"/>-->
+  <arg name="z" default="0.0175"/>
+  <arg name="roll" default="0"/>
+  <arg name="pitch" default="0"/>
+  <!--<arg name="yaw" default="3.14159"/>-->
+  <arg name="yaw" default="4.3"/>
+  <!-- simulation parameters -->
+  <arg name="world" default="empty"/> 
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+	<arg name="gui" default="true"/>
+	<arg name="debug" default="false"/>
+  
+  <!-- launch gazebo server and client from empty_world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+    <arg name="world_name" value="$(find challenge_project)/worlds/challenge3.world"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="debug" value="$(arg debug)"/>
+  </include>
+
+  <!-- spawn model in world -->
+  <node name="mybot_gazebo" pkg="gazebo_ros" 
+        type="spawn_model" output="screen"
+        args="-urdf -param robot_description -model mybot 
+          		-x $(arg x) -y $(arg y) -z $(arg z)
+      				-R $(arg roll) -P $(arg pitch) -Y $(arg yaw)" 
+  />
+  <!--distance d'arret à obstacle-->
+  <param name="d" value="0.5"/>
+  <!--Moving obstacle-->
+  <node name="OBSTACLE" pkg="challenge_project" type="challenge3b_world_control.py"/>
+  <!--Garage door-->
+  <node name="DOOR" pkg="challenge_project" type="challenge3a_world_control.py"/>
+
+  <node name="Line_and_obstacle_node" pkg="challenge_project" type="challenge3_task2.py" output="screen" required="true"/>
+
+</launch>
